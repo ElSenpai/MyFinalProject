@@ -1,4 +1,5 @@
 ﻿using Business.Abstract;
+using Business.BusinessAspects.Autofac;
 using Business.CCS;
 using Business.Constants;
 using Business.ValidationRules.FluentValidation;
@@ -31,7 +32,8 @@ namespace Business.Concrete
 
 
         }
-        [ValidationAspect(typeof(ProductValidator))] //Validation  ;nesnenin  yapısal olarak uygun olup olmadığını kontrol eder ,
+        [SecuredOperation("product.add,admin")]
+        [ValidationAspect(typeof(ProductValidator))] 
         public IResult Add(Product product)
         {
             IResult result = BusinessRules.Run(CheckIfProductCountOfCategoryCorrect(product.CategoryId),
@@ -54,10 +56,10 @@ namespace Business.Concrete
             //yetkisi varsa
             if (DateTime.Now.Hour == 2)
             {
-                return new ErrorDataResult<List<Product>>(Messages.MaintenanceTime);
+                return new ErrorDataResult<List<Product>>(Messages.DefaultE);
             }
 
-            return new SuccessDataResult<List<Product>>(_productDal.GetAll(), Messages.ProductsListed);
+            return new SuccessDataResult<List<Product>>(_productDal.GetAll(), Messages.DefaultS);
 
         }
 
@@ -93,9 +95,9 @@ namespace Business.Concrete
 
             if (result >= 10)
             {
-                return new ErrorResult(Messages.CheckIfError);
+                return new ErrorResult(Messages.DefaultE);
             }
-            return new SuccessResult(Messages.CheckIfSuccess);
+            return new SuccessResult(Messages.DefaultS);
         }
         private IResult CheckIfProductNameExists(string productName)
         {
@@ -103,10 +105,10 @@ namespace Business.Concrete
 
             if (result)
             {
-                return new ErrorResult(Messages.ProductNameAlreadyExist);
+                return new ErrorResult(Messages.DefaultE);
 
             }
-            return new SuccessResult(Messages.CheckIfSuccess);
+            return new SuccessResult(Messages.DefaultS);
         }
         private IResult CheckIfCategoryLimitExceded()
 
@@ -115,10 +117,10 @@ namespace Business.Concrete
 
             if (result.Data.Count > 15)
             {
-                return new ErrorResult(Messages.LimitExceded);
+                return new ErrorResult(Messages.DefaultE);
                 
             }
-            return new SuccessResult(Messages.CheckIfSuccess);
+            return new SuccessResult(Messages.DefaultS);
         }
     }
 }
