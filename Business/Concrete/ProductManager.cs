@@ -3,6 +3,9 @@ using Business.BusinessAspects.Autofac;
 using Business.CCS;
 using Business.Constants;
 using Business.ValidationRules.FluentValidation;
+using Core.Aspects.Autofac.Caching;
+using Core.Aspects.Autofac.Performance;
+using Core.Aspects.Autofac.Transaction;
 using Core.Aspects.Autofac.Validation;
 using Core.CrossCuttingConcerns.Validation;
 using Core.Utilities.Business;
@@ -32,8 +35,9 @@ namespace Business.Concrete
 
 
         }
-        [SecuredOperation("product.add,admin")]
-        [ValidationAspect(typeof(ProductValidator))] 
+        [SecuredOperation("senpai,admin,product.add")]
+        //[ValidationAspect(typeof(ProductValidator))] 
+        [CacheRemoveAspect("IProductService.Get")]
         public IResult Add(Product product)
         {
             IResult result = BusinessRules.Run(CheckIfProductCountOfCategoryCorrect(product.CategoryId),
@@ -49,7 +53,8 @@ namespace Business.Concrete
 
 
         }
-
+       // [PerformanceAspect(4)]
+        [CacheAspect]
         public IDataResult<List<Product>> GetAll()
         {
             //iş kodları
@@ -67,7 +72,7 @@ namespace Business.Concrete
         {
             return new SuccessDataResult<List<Product>>(_productDal.GetAll(p => p.CategoryId == id));
         }
-
+        [CacheAspect]
         public IDataResult<Product> GetById(int productId)
         {
             return new SuccessDataResult<Product>(_productDal.Get(p => p.ProductId == productId));
@@ -83,6 +88,7 @@ namespace Business.Concrete
             return new SuccessDataResult<List<ProductDetailDto>>(_productDal.GetProductDetails());
         }
         [ValidationAspect(typeof(ProductValidator))]
+        [CacheRemoveAspect("IProductService.Get")]
         public IResult Update(Product product)
         {
 
@@ -93,7 +99,7 @@ namespace Business.Concrete
         {
             var result = _productDal.GetAll(c => c.CategoryId == categoryId).Count;
 
-            if (result >= 10)
+            if (result >= 30)
             {
                 return new ErrorResult(Messages.DefaultE);
             }
@@ -115,12 +121,20 @@ namespace Business.Concrete
         {
             var result = _categoryService.GetAll();
 
-            if (result.Data.Count > 15)
+            if (result.Data.Count > 25)
             {
                 return new ErrorResult(Messages.DefaultE);
                 
             }
             return new SuccessResult(Messages.DefaultS);
+        }
+        [TransactionScopeAspect]
+        public IResult AddTransactionalTest(Product product)
+        {
+            _productDal.Update(product);
+            _productDal.Add(product);
+            return new SuccessResult(Messages.ProductUpdated);
+
         }
     }
 }
