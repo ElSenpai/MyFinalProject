@@ -59,10 +59,7 @@ namespace Business.Concrete
         {
             //iş kodları
             //yetkisi varsa
-            if (DateTime.Now.Hour == 2)
-            {
-                return new ErrorDataResult<List<Product>>(Messages.DefaultE);
-            }
+            
 
             return new SuccessDataResult<List<Product>>(_productDal.GetAll(), Messages.DefaultS);
 

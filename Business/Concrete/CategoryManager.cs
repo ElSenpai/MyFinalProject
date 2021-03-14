@@ -15,6 +15,13 @@ namespace Business.Concrete
         {
             _categorydal = categoryDal;
         }
+
+        public IResult Add(Category category)
+        {
+            _categorydal.Add(category);
+            return new SuccessResult();
+        }
+
         public IDataResult< List<Category>> GetAll()
         {
             return new SuccessDataResult<List<Category>>( _categorydal.GetAll());
