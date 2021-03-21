@@ -35,8 +35,8 @@ namespace Business.Concrete
 
 
         }
-        [SecuredOperation("senpai,admin,product.add")]
-        //[ValidationAspect(typeof(ProductValidator))] 
+        //[SecuredOperation("senpai,admin,product.add")]
+        [ValidationAspect(typeof(ProductValidator))] 
         [CacheRemoveAspect("IProductService.Get")]
         public IResult Add(Product product)
         {
